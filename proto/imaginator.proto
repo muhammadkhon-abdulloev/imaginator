@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package imaginator.v1;
+
+option go_package = "gen/go/imaginator/v1";
+
+message UploadImageRequest {
+  string filename = 1;
+  bytes image = 2;
+}
+
+message UploadImageResponse {
+  string filename = 1;
+  int64 filesize = 2;
+}
+
+message DownloadImageRequest {
+  string filename = 1;
+  uint64 chunkSize = 2;
+}
+
+message DownloadImageResponse {
+  bytes data = 1;
+}
+
+message Files {
+  string filename = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+}
+
+message ListAllFilesMessage {
+  repeated Files files = 1;
+}
+
+service Imaginator {
+  rpc UploadImage(UploadImageRequest) returns (UploadImageResponse) {}
+  rpc DownloadImage(DownloadImageRequest) returns (DownloadImageResponse) {}
+  rpc ListAllFiles(ListAllFilesMessage) returns (ListAllFilesMessage) {}
+  // stream
+  rpc UploadImageByChunk(stream UploadImageRequest) returns (UploadImageResponse) {}
+  rpc DownloadImageByChunk(DownloadImageRequest) returns (stream DownloadImageResponse) {}
+}
