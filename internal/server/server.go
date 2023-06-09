@@ -2,8 +2,8 @@ package server
 
 import (
 	"fmt"
-	"github.com/muhammadkhon-abdulloev/imaginator/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/gen/go/imaginator/v1"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/handler"
 	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage"
 	"github.com/muhammadkhon-abdulloev/pkg/logger"

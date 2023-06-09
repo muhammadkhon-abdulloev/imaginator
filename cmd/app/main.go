@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/muhammadkhon-abdulloev/imaginator/config"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/server"
 	"github.com/muhammadkhon-abdulloev/pkg/logger"
 )
