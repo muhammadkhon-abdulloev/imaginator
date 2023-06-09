@@ -22,12 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ImaginatorClient interface {
-	UploadImage(ctx context.Context, in *UploadImageRequest, opts ...grpc.CallOption) (*UploadImageResponse, error)
-	DownloadImage(ctx context.Context, in *DownloadImageRequest, opts ...grpc.CallOption) (*DownloadImageResponse, error)
+	UploadFile(ctx context.Context, in *UploadFileRequest, opts ...grpc.CallOption) (*UploadFileResponse, error)
+	DownloadFile(ctx context.Context, in *DownloadFileRequest, opts ...grpc.CallOption) (*DownloadFileResponse, error)
 	ListAllFiles(ctx context.Context, in *ListAllFilesMessage, opts ...grpc.CallOption) (*ListAllFilesMessage, error)
 	// stream
-	UploadImageByChunk(ctx context.Context, opts ...grpc.CallOption) (Imaginator_UploadImageByChunkClient, error)
-	DownloadImageByChunk(ctx context.Context, in *DownloadImageRequest, opts ...grpc.CallOption) (Imaginator_DownloadImageByChunkClient, error)
+	UploadFileByChunk(ctx context.Context, opts ...grpc.CallOption) (Imaginator_UploadFileByChunkClient, error)
+	DownloadFileByChunk(ctx context.Context, in *DownloadFileRequest, opts ...grpc.CallOption) (Imaginator_DownloadFileByChunkClient, error)
 }
 
 type imaginatorClient struct {
@@ -38,18 +38,18 @@ func NewImaginatorClient(cc grpc.ClientConnInterface) ImaginatorClient {
 	return &imaginatorClient{cc}
 }
 
-func (c *imaginatorClient) UploadImage(ctx context.Context, in *UploadImageRequest, opts ...grpc.CallOption) (*UploadImageResponse, error) {
-	out := new(UploadImageResponse)
-	err := c.cc.Invoke(ctx, "/imaginator.v1.Imaginator/UploadImage", in, out, opts...)
+func (c *imaginatorClient) UploadFile(ctx context.Context, in *UploadFileRequest, opts ...grpc.CallOption) (*UploadFileResponse, error) {
+	out := new(UploadFileResponse)
+	err := c.cc.Invoke(ctx, "/imaginator.v1.Imaginator/UploadFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *imaginatorClient) DownloadImage(ctx context.Context, in *DownloadImageRequest, opts ...grpc.CallOption) (*DownloadImageResponse, error) {
-	out := new(DownloadImageResponse)
-	err := c.cc.Invoke(ctx, "/imaginator.v1.Imaginator/DownloadImage", in, out, opts...)
+func (c *imaginatorClient) DownloadFile(ctx context.Context, in *DownloadFileRequest, opts ...grpc.CallOption) (*DownloadFileResponse, error) {
+	out := new(DownloadFileResponse)
+	err := c.cc.Invoke(ctx, "/imaginator.v1.Imaginator/DownloadFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,46 +65,46 @@ func (c *imaginatorClient) ListAllFiles(ctx context.Context, in *ListAllFilesMes
 	return out, nil
 }
 
-func (c *imaginatorClient) UploadImageByChunk(ctx context.Context, opts ...grpc.CallOption) (Imaginator_UploadImageByChunkClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Imaginator_ServiceDesc.Streams[0], "/imaginator.v1.Imaginator/UploadImageByChunk", opts...)
+func (c *imaginatorClient) UploadFileByChunk(ctx context.Context, opts ...grpc.CallOption) (Imaginator_UploadFileByChunkClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Imaginator_ServiceDesc.Streams[0], "/imaginator.v1.Imaginator/UploadFileByChunk", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &imaginatorUploadImageByChunkClient{stream}
+	x := &imaginatorUploadFileByChunkClient{stream}
 	return x, nil
 }
 
-type Imaginator_UploadImageByChunkClient interface {
-	Send(*UploadImageRequest) error
-	CloseAndRecv() (*UploadImageResponse, error)
+type Imaginator_UploadFileByChunkClient interface {
+	Send(*UploadFileRequest) error
+	CloseAndRecv() (*UploadFileResponse, error)
 	grpc.ClientStream
 }
 
-type imaginatorUploadImageByChunkClient struct {
+type imaginatorUploadFileByChunkClient struct {
 	grpc.ClientStream
 }
 
-func (x *imaginatorUploadImageByChunkClient) Send(m *UploadImageRequest) error {
+func (x *imaginatorUploadFileByChunkClient) Send(m *UploadFileRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *imaginatorUploadImageByChunkClient) CloseAndRecv() (*UploadImageResponse, error) {
+func (x *imaginatorUploadFileByChunkClient) CloseAndRecv() (*UploadFileResponse, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
-	m := new(UploadImageResponse)
+	m := new(UploadFileResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (c *imaginatorClient) DownloadImageByChunk(ctx context.Context, in *DownloadImageRequest, opts ...grpc.CallOption) (Imaginator_DownloadImageByChunkClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Imaginator_ServiceDesc.Streams[1], "/imaginator.v1.Imaginator/DownloadImageByChunk", opts...)
+func (c *imaginatorClient) DownloadFileByChunk(ctx context.Context, in *DownloadFileRequest, opts ...grpc.CallOption) (Imaginator_DownloadFileByChunkClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Imaginator_ServiceDesc.Streams[1], "/imaginator.v1.Imaginator/DownloadFileByChunk", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &imaginatorDownloadImageByChunkClient{stream}
+	x := &imaginatorDownloadFileByChunkClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -114,17 +114,17 @@ func (c *imaginatorClient) DownloadImageByChunk(ctx context.Context, in *Downloa
 	return x, nil
 }
 
-type Imaginator_DownloadImageByChunkClient interface {
-	Recv() (*DownloadImageResponse, error)
+type Imaginator_DownloadFileByChunkClient interface {
+	Recv() (*DownloadFileResponse, error)
 	grpc.ClientStream
 }
 
-type imaginatorDownloadImageByChunkClient struct {
+type imaginatorDownloadFileByChunkClient struct {
 	grpc.ClientStream
 }
 
-func (x *imaginatorDownloadImageByChunkClient) Recv() (*DownloadImageResponse, error) {
-	m := new(DownloadImageResponse)
+func (x *imaginatorDownloadFileByChunkClient) Recv() (*DownloadFileResponse, error) {
+	m := new(DownloadFileResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -135,12 +135,12 @@ func (x *imaginatorDownloadImageByChunkClient) Recv() (*DownloadImageResponse, e
 // All implementations must embed UnimplementedImaginatorServer
 // for forward compatibility
 type ImaginatorServer interface {
-	UploadImage(context.Context, *UploadImageRequest) (*UploadImageResponse, error)
-	DownloadImage(context.Context, *DownloadImageRequest) (*DownloadImageResponse, error)
+	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
+	DownloadFile(context.Context, *DownloadFileRequest) (*DownloadFileResponse, error)
 	ListAllFiles(context.Context, *ListAllFilesMessage) (*ListAllFilesMessage, error)
 	// stream
-	UploadImageByChunk(Imaginator_UploadImageByChunkServer) error
-	DownloadImageByChunk(*DownloadImageRequest, Imaginator_DownloadImageByChunkServer) error
+	UploadFileByChunk(Imaginator_UploadFileByChunkServer) error
+	DownloadFileByChunk(*DownloadFileRequest, Imaginator_DownloadFileByChunkServer) error
 	mustEmbedUnimplementedImaginatorServer()
 }
 
@@ -148,20 +148,20 @@ type ImaginatorServer interface {
 type UnimplementedImaginatorServer struct {
 }
 
-func (UnimplementedImaginatorServer) UploadImage(context.Context, *UploadImageRequest) (*UploadImageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UploadImage not implemented")
+func (UnimplementedImaginatorServer) UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadFile not implemented")
 }
-func (UnimplementedImaginatorServer) DownloadImage(context.Context, *DownloadImageRequest) (*DownloadImageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DownloadImage not implemented")
+func (UnimplementedImaginatorServer) DownloadFile(context.Context, *DownloadFileRequest) (*DownloadFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadFile not implemented")
 }
 func (UnimplementedImaginatorServer) ListAllFiles(context.Context, *ListAllFilesMessage) (*ListAllFilesMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAllFiles not implemented")
 }
-func (UnimplementedImaginatorServer) UploadImageByChunk(Imaginator_UploadImageByChunkServer) error {
-	return status.Errorf(codes.Unimplemented, "method UploadImageByChunk not implemented")
+func (UnimplementedImaginatorServer) UploadFileByChunk(Imaginator_UploadFileByChunkServer) error {
+	return status.Errorf(codes.Unimplemented, "method UploadFileByChunk not implemented")
 }
-func (UnimplementedImaginatorServer) DownloadImageByChunk(*DownloadImageRequest, Imaginator_DownloadImageByChunkServer) error {
-	return status.Errorf(codes.Unimplemented, "method DownloadImageByChunk not implemented")
+func (UnimplementedImaginatorServer) DownloadFileByChunk(*DownloadFileRequest, Imaginator_DownloadFileByChunkServer) error {
+	return status.Errorf(codes.Unimplemented, "method DownloadFileByChunk not implemented")
 }
 func (UnimplementedImaginatorServer) mustEmbedUnimplementedImaginatorServer() {}
 
@@ -176,38 +176,38 @@ func RegisterImaginatorServer(s grpc.ServiceRegistrar, srv ImaginatorServer) {
 	s.RegisterService(&Imaginator_ServiceDesc, srv)
 }
 
-func _Imaginator_UploadImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadImageRequest)
+func _Imaginator_UploadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadFileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ImaginatorServer).UploadImage(ctx, in)
+		return srv.(ImaginatorServer).UploadFile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/imaginator.v1.Imaginator/UploadImage",
+		FullMethod: "/imaginator.v1.Imaginator/UploadFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ImaginatorServer).UploadImage(ctx, req.(*UploadImageRequest))
+		return srv.(ImaginatorServer).UploadFile(ctx, req.(*UploadFileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Imaginator_DownloadImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DownloadImageRequest)
+func _Imaginator_DownloadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadFileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ImaginatorServer).DownloadImage(ctx, in)
+		return srv.(ImaginatorServer).DownloadFile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/imaginator.v1.Imaginator/DownloadImage",
+		FullMethod: "/imaginator.v1.Imaginator/DownloadFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ImaginatorServer).DownloadImage(ctx, req.(*DownloadImageRequest))
+		return srv.(ImaginatorServer).DownloadFile(ctx, req.(*DownloadFileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -230,50 +230,50 @@ func _Imaginator_ListAllFiles_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Imaginator_UploadImageByChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ImaginatorServer).UploadImageByChunk(&imaginatorUploadImageByChunkServer{stream})
+func _Imaginator_UploadFileByChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ImaginatorServer).UploadFileByChunk(&imaginatorUploadFileByChunkServer{stream})
 }
 
-type Imaginator_UploadImageByChunkServer interface {
-	SendAndClose(*UploadImageResponse) error
-	Recv() (*UploadImageRequest, error)
+type Imaginator_UploadFileByChunkServer interface {
+	SendAndClose(*UploadFileResponse) error
+	Recv() (*UploadFileRequest, error)
 	grpc.ServerStream
 }
 
-type imaginatorUploadImageByChunkServer struct {
+type imaginatorUploadFileByChunkServer struct {
 	grpc.ServerStream
 }
 
-func (x *imaginatorUploadImageByChunkServer) SendAndClose(m *UploadImageResponse) error {
+func (x *imaginatorUploadFileByChunkServer) SendAndClose(m *UploadFileResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *imaginatorUploadImageByChunkServer) Recv() (*UploadImageRequest, error) {
-	m := new(UploadImageRequest)
+func (x *imaginatorUploadFileByChunkServer) Recv() (*UploadFileRequest, error) {
+	m := new(UploadFileRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func _Imaginator_DownloadImageByChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(DownloadImageRequest)
+func _Imaginator_DownloadFileByChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(DownloadFileRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ImaginatorServer).DownloadImageByChunk(m, &imaginatorDownloadImageByChunkServer{stream})
+	return srv.(ImaginatorServer).DownloadFileByChunk(m, &imaginatorDownloadFileByChunkServer{stream})
 }
 
-type Imaginator_DownloadImageByChunkServer interface {
-	Send(*DownloadImageResponse) error
+type Imaginator_DownloadFileByChunkServer interface {
+	Send(*DownloadFileResponse) error
 	grpc.ServerStream
 }
 
-type imaginatorDownloadImageByChunkServer struct {
+type imaginatorDownloadFileByChunkServer struct {
 	grpc.ServerStream
 }
 
-func (x *imaginatorDownloadImageByChunkServer) Send(m *DownloadImageResponse) error {
+func (x *imaginatorDownloadFileByChunkServer) Send(m *DownloadFileResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -285,12 +285,12 @@ var Imaginator_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ImaginatorServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "UploadImage",
-			Handler:    _Imaginator_UploadImage_Handler,
+			MethodName: "UploadFile",
+			Handler:    _Imaginator_UploadFile_Handler,
 		},
 		{
-			MethodName: "DownloadImage",
-			Handler:    _Imaginator_DownloadImage_Handler,
+			MethodName: "DownloadFile",
+			Handler:    _Imaginator_DownloadFile_Handler,
 		},
 		{
 			MethodName: "ListAllFiles",
@@ -299,13 +299,13 @@ var Imaginator_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "UploadImageByChunk",
-			Handler:       _Imaginator_UploadImageByChunk_Handler,
+			StreamName:    "UploadFileByChunk",
+			Handler:       _Imaginator_UploadFileByChunk_Handler,
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "DownloadImageByChunk",
-			Handler:       _Imaginator_DownloadImageByChunk_Handler,
+			StreamName:    "DownloadFileByChunk",
+			Handler:       _Imaginator_DownloadFileByChunk_Handler,
 			ServerStreams: true,
 		},
 	},

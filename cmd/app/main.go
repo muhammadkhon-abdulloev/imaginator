@@ -4,24 +4,23 @@ import (
 	"context"
 	"fmt"
 	"github.com/muhammadkhon-abdulloev/imaginator/config"
-	"os"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/server"
+	"github.com/muhammadkhon-abdulloev/pkg/logger"
 )
 
 func main() {
 	cfg, err := config.Init(context.Background())
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("config.Init: %w", err).Error())
 	}
 
-	fmt.Println(cfg.Server.Port)
-
-	files, err := os.ReadDir("assets")
-	if err != nil {
-		panic(err)
+	lg := logger.NewLogger()
+	if err = lg.InitLogger(cfg.Logger); err != nil {
+		panic(fmt.Errorf("lg.InitLogger: %w", err).Error())
 	}
 
-	for _, file := range files {
-		fmt.Println(file.Name())
-
+	srv := server.NewServer(lg)
+	if err = srv.Run(); err != nil {
+		panic(fmt.Errorf("srv.Run: %w", err).Error())
 	}
 }

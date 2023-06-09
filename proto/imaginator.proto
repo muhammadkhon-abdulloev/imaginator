@@ -4,29 +4,29 @@ package imaginator.v1;
 
 option go_package = "gen/go/imaginator/v1";
 
-message UploadImageRequest {
+message UploadFileRequest {
   string filename = 1;
-  bytes image = 2;
+  bytes data = 2;
 }
 
-message UploadImageResponse {
+message UploadFileResponse {
   string filename = 1;
   int64 filesize = 2;
 }
 
-message DownloadImageRequest {
+message DownloadFileRequest {
   string filename = 1;
   uint64 chunkSize = 2;
 }
 
-message DownloadImageResponse {
+message DownloadFileResponse {
   bytes data = 1;
 }
 
 message Files {
   string filename = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
 }
 
 message ListAllFilesMessage {
@@ -34,10 +34,11 @@ message ListAllFilesMessage {
 }
 
 service Imaginator {
-  rpc UploadImage(UploadImageRequest) returns (UploadImageResponse) {}
-  rpc DownloadImage(DownloadImageRequest) returns (DownloadImageResponse) {}
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
+  rpc DownloadFile(DownloadFileRequest) returns (DownloadFileResponse) {}
   rpc ListAllFiles(ListAllFilesMessage) returns (ListAllFilesMessage) {}
+
   // stream
-  rpc UploadImageByChunk(stream UploadImageRequest) returns (UploadImageResponse) {}
-  rpc DownloadImageByChunk(DownloadImageRequest) returns (stream DownloadImageResponse) {}
+  rpc UploadFileByChunk(stream UploadFileRequest) returns (UploadFileResponse) {}
+  rpc DownloadFileByChunk(DownloadFileRequest) returns (stream DownloadFileResponse) {}
 }

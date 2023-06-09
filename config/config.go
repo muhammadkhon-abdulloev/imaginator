@@ -3,10 +3,12 @@ package config
 import (
 	"context"
 	"fmt"
+	"github.com/muhammadkhon-abdulloev/pkg/logger"
 	"github.com/sethvargo/go-envconfig"
 )
 
 type Config struct {
+	Logger logger.Config
 	Server Server
 }
 
@@ -17,7 +19,10 @@ func GetConfig() *Config {
 }
 
 type Server struct {
-	Port string `env:"PORT,default=5555"`
+	Port                string `env:"PORT,default=5555"`
+	ImagesPath          string `env:"IMAGES_PATH,default=assets"`
+	UploadDownloadLimit int    `env:"UPLOAD_DOWNLOAD_LIMIT,default=10"`
+	ListAllFilesLimit   int    `env:"LIST_ALL_FILES_LIMIT,default=100"`
 }
 
 func Init(ctx context.Context) (*Config, error) {
