@@ -35,6 +35,8 @@ func (s *Storage) Upload(filename string, data []byte) (*File, error) {
 		return nil, fmt.Errorf("os.Create: %w", err)
 	}
 
+	defer newFile.Close()
+
 	size, err := newFile.Write(data)
 	if err != nil {
 		return nil, fmt.Errorf("newFile.Write: %w", err)
@@ -49,6 +51,9 @@ func (s *Storage) Download(filename string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("os.Open: %w", err)
 	}
+
+	defer file.Close()
+
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("io.ReadAll; %w", err)
