@@ -1,5 +1,5 @@
 up:
-	docker compose --env-file $(env_file) up -d
+	docker compose --env-file $(env_file) up -d --build
 
 build:
 	go mod tidy

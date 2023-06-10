@@ -1,13 +1,20 @@
 package disk
 
 import (
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
 )
 
 func TestStorage_Upload(t *testing.T) {
-	storage := NewStorage(".")
+	storage := New(Params{
+		Config: &config.Config{
+			Server: config.Server{
+				ImagesPath: ".",
+			},
+		},
+	})
 
 	testCases := []struct {
 		filename string
@@ -35,7 +42,13 @@ func TestStorage_Upload(t *testing.T) {
 }
 
 func TestStorage_Download(t *testing.T) {
-	storage := NewStorage(".")
+	storage := New(Params{
+		Config: &config.Config{
+			Server: config.Server{
+				ImagesPath: ".",
+			},
+		},
+	})
 	data := []byte("hello")
 
 	filename, err := storage.Upload("file1.txt", data)
@@ -68,7 +81,14 @@ func TestStorage_Download(t *testing.T) {
 }
 
 func TestStorage_ListAllFiles(t *testing.T) {
-	storage := NewStorage(".")
+	storage := New(Params{
+		Config: &config.Config{
+			Server: config.Server{
+				ImagesPath: ".",
+			},
+		},
+	})
+
 	files, err := storage.ListAllFiles()
 	require.Nil(t, err)
 	require.NotNil(t, files)

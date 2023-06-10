@@ -110,7 +110,7 @@ func (h *Handler) streamFileAsync(
 	for i := 0; i < chunksQ; i++ {
 		i := i
 		eg.Go(func() error {
-			return h.sendToStream(i, chunks, file, conn)
+			return h.sendToStream(i, chunks[i], file, conn)
 		})
 	}
 
@@ -119,19 +119,19 @@ func (h *Handler) streamFileAsync(
 
 func (h *Handler) sendToStream(
 	i int,
-	chunks []chunk,
+	chunk chunk,
 	file *os.File,
 	conn v1.Imaginator_DownloadFileByChunkServer,
 ) error {
-	buf := make([]byte, chunks[i].bufSize)
+	buf := make([]byte, chunk.bufSize)
 
-	_, err := file.ReadAt(buf, int64(chunks[i].offset))
-	if err != nil {
+	n, err := file.ReadAt(buf, int64(chunk.offset))
+	if err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("file.ReadAt: %w", err)
 	}
 
 	err = conn.Send(&v1.DownloadFileResponse{
-		Data:   buf,
+		Data:   buf[:n],
 		Offset: int64(i),
 	})
 	if err != nil {

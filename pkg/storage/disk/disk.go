@@ -125,6 +125,11 @@ func (s *Storage) ListAllFiles() ([]*storage.File, error) {
 }
 
 func (s *Storage) Paginate(limit, offset int64, files []*storage.File) []*storage.File {
+	total := int64(len(files))
+	if total < 1 {
+		return files
+	}
+
 	if offset != 0 {
 		offset--
 	}
@@ -133,7 +138,6 @@ func (s *Storage) Paginate(limit, offset int64, files []*storage.File) []*storag
 		limit = maxLimit
 	}
 
-	total := int64(len(files) - 1)
 	firstEntry := offset * limit
 	lastEntry := firstEntry + limit
 
