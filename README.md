@@ -1,18 +1,22 @@
 IMAGINATOR
 
-To start:
+Для билда и запуска:
 ```shell
-go mod tidy
-go run cmd/app/main.go
+make build output=WHERE_OUTPUT
 ```
 
-OR using docker
+Для запуска в docker
 
 ```shell
-docker compose --env-file .env.example up -d
+make up env_file=PATH_TO_ENV_FILE
 ```
 
-Run tests
+Для запуска тестов
 ```shell
-go test -v ./...
+make test
+```
+
+Для генерации .proto файла
+```shell
+protoc -I . --go_out=. --go-grpc_out=. proto/imaginator.proto
 ```
