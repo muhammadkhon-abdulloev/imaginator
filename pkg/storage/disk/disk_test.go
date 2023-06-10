@@ -8,11 +8,9 @@ import (
 )
 
 func TestStorage_Upload(t *testing.T) {
-	storage := New(Params{
-		Config: &config.Config{
-			Server: config.Server{
-				ImagesPath: ".",
-			},
+	storage := New(&config.Config{
+		Server: config.Server{
+			ImagesPath: ".",
 		},
 	})
 
@@ -42,11 +40,9 @@ func TestStorage_Upload(t *testing.T) {
 }
 
 func TestStorage_Download(t *testing.T) {
-	storage := New(Params{
-		Config: &config.Config{
-			Server: config.Server{
-				ImagesPath: ".",
-			},
+	storage := New(&config.Config{
+		Server: config.Server{
+			ImagesPath: ".",
 		},
 	})
 	data := []byte("hello")
@@ -81,11 +77,9 @@ func TestStorage_Download(t *testing.T) {
 }
 
 func TestStorage_ListAllFiles(t *testing.T) {
-	storage := New(Params{
-		Config: &config.Config{
-			Server: config.Server{
-				ImagesPath: ".",
-			},
+	storage := New(&config.Config{
+		Server: config.Server{
+			ImagesPath: ".",
 		},
 	})
 
