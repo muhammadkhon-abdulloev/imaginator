@@ -9,14 +9,9 @@ import (
 
 var Option = fx.Provide(New)
 
-type Params struct {
-	fx.In
-	Config *config.Config
-}
-
-func New(params Params) (*logger.Logger, error) {
+func New(cfg *config.Config) (*logger.Logger, error) {
 	lg := logger.NewLogger()
-	if err := lg.InitLogger(params.Config.Logger); err != nil {
+	if err := lg.InitLogger(cfg.Logger); err != nil {
 		return nil, fmt.Errorf("lg.InitLogger: %w", err)
 	}
 

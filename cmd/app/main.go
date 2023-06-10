@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/handler"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/middleware"
@@ -12,6 +13,7 @@ import (
 
 func main() {
 	mainModules := fx.Options(
+		fx.Provide(context.Background),
 		config.Option,
 		logger.Option,
 		disk.Option,

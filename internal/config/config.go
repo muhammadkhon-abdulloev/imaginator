@@ -15,7 +15,7 @@ type Config struct {
 
 var (
 	_c     = &Config{}
-	Option = fx.Provide(context.Background, Init)
+	Option = fx.Provide(Init)
 )
 
 func GetConfig() *Config {

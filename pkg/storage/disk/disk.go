@@ -28,14 +28,9 @@ var (
 	Option                        = fx.Provide(New)
 )
 
-type Params struct {
-	fx.In
-	Config *config.Config
-}
-
-func New(p Params) *Storage {
+func New(cfg *config.Config) *Storage {
 	return &Storage{
-		filesPath: p.Config.Server.ImagesPath,
+		filesPath: cfg.Server.ImagesPath,
 	}
 }
 func (s *Storage) Upload(filename string, data []byte) (*storage.File, error) {

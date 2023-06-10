@@ -6,6 +6,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/muhammadkhon-abdulloev/pkg/logger"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -22,12 +23,11 @@ var (
 
 type Params struct {
 	fx.In
-	Logger *logger.Logger
 }
 
-func New(p Params) *Middleware {
+func New(lg *logger.Logger) *Middleware {
 	return &Middleware{
-		lg: p.Logger,
+		lg: lg,
 	}
 }
 
@@ -53,6 +53,29 @@ func _recover(p any) (err error) {
 
 func _interceptorLogger(lg *logger.Logger) logging.LoggerFunc {
 	return func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
+		f := make([]zap.Field, 0, 2)
+
+		for i := 0; i < len(fields); i += 2 {
+			key, ok := fields[i].(string)
+			if !ok {
+				lg.Error("invalid key type")
+				return
+			}
+
+			value := fields[i+1]
+
+			switch v := value.(type) {
+			case string:
+				f = append(f, zap.String(key, v))
+			case int:
+				f = append(f, zap.Int(key, v))
+			case bool:
+				f = append(f, zap.Bool(key, v))
+			default:
+				f = append(f, zap.Any(key, v))
+			}
+		}
+
 		var level zapcore.Level
 		switch lvl {
 		case logging.LevelDebug:
@@ -65,6 +88,6 @@ func _interceptorLogger(lg *logger.Logger) logging.LoggerFunc {
 			level = zapcore.InfoLevel
 		}
 
-		lg.Log(level, msg)
+		lg.Log(level, msg, f...)
 	}
 }
