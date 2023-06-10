@@ -5,7 +5,7 @@ import (
 	"github.com/muhammadkhon-abdulloev/imaginator/gen/go/imaginator/v1"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/handler"
-	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage"
+	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage/disk"
 	"github.com/muhammadkhon-abdulloev/pkg/logger"
 	"google.golang.org/grpc"
 	"net"
@@ -27,7 +27,7 @@ func (s Server) Run() error {
 		return fmt.Errorf("net.Listen: %w", err)
 	}
 
-	st := storage.NewStorage(config.GetConfig().Server.ImagesPath)
+	st := disk.NewStorage(config.GetConfig().Server.ImagesPath)
 	h := handler.NewHandler(
 		config.GetConfig().Server.UploadDownloadLimit,
 		config.GetConfig().Server.ListAllFilesLimit,
