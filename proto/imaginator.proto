@@ -16,11 +16,13 @@ message UploadFileResponse {
 
 message DownloadFileRequest {
   string filename = 1;
-  uint64 chunkSize = 2;
+  uint64 chunkBuffSize = 2;
 }
 
 message DownloadFileResponse {
   bytes data = 1;
+  int64 offset = 2;
+  string checksum = 3;
 }
 
 message Files {

@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/muhammadkhon-abdulloev/imaginator/pkg/crypto"
 	"io"
 	"os"
 	"strconv"
@@ -10,7 +11,12 @@ import (
 	"time"
 )
 
-const fileNameTemp = "%d_%s"
+const (
+	fileNameTemp = "%d_%s"
+	//bufSize      = 500 * 1024
+)
+
+var _ IStorage = (*Storage)(nil)
 
 type Storage struct {
 	filesPath string
@@ -46,8 +52,8 @@ func (s *Storage) Upload(filename string, data []byte) (*File, error) {
 	return file, nil
 }
 
-func (s *Storage) Download(filename string) ([]byte, error) {
-	file, err := os.Open(filename)
+func (s *Storage) Download(filename string) (*File, error) {
+	file, err := os.Open(s.filesPath + "/" + filename)
 	if err != nil {
 		return nil, fmt.Errorf("os.Open: %w", err)
 	}
@@ -59,7 +65,25 @@ func (s *Storage) Download(filename string) ([]byte, error) {
 		return nil, fmt.Errorf("io.ReadAll; %w", err)
 	}
 
-	return data, nil
+	checksum, err := crypto.FileChecksumSHA256(file)
+	if err != nil {
+		return nil, fmt.Errorf("crypto.FileChecksumSHA256: %w", err)
+	}
+
+	f := NewEmptyFile()
+	f.SetBytes(data)
+	f.SetCheckSum(checksum)
+
+	return f, nil
+}
+
+func (s *Storage) GetFile(filename string) (*os.File, error) {
+	file, err := os.Open(s.filesPath + "/" + filename)
+	if err != nil {
+		return nil, fmt.Errorf("os.Open: %w", err)
+	}
+
+	return file, nil
 }
 
 func (s *Storage) ListAllFiles() ([]*File, error) {

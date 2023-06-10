@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"errors"
@@ -15,7 +14,7 @@ import (
 type Handler struct {
 	duLimitCh  chan struct{} // download/upload limit chan
 	lafLimitCh chan struct{} // list all files limit chan
-	_storage   *storage.Storage
+	_storage   storage.IStorage
 	lg         *logger.Logger
 	v1.UnimplementedImaginatorServer
 }
@@ -23,7 +22,7 @@ type Handler struct {
 func NewHandler(
 	duLimit,
 	lafLimit int,
-	_storage *storage.Storage,
+	_storage storage.IStorage,
 	lg *logger.Logger,
 ) *Handler {
 	return &Handler{
@@ -68,7 +67,8 @@ func (h *Handler) DownloadFile(_ context.Context, req *v1.DownloadFileRequest) (
 	}
 
 	return &v1.DownloadFileResponse{
-		Data: file,
+		Data:     file.Bytes,
+		Checksum: file.CheckSum,
 	}, nil
 }
 
@@ -121,14 +121,7 @@ func (h *Handler) UploadFileByChunk(conn v1.Imaginator_UploadFileByChunkServer) 
 		filename = req.GetFilename()
 	}
 
-	data, err := io.ReadAll(bf)
-	if err != nil {
-		err = fmt.Errorf("io.ReadAll: %w", err)
-		h.lg.Error(err)
-		return err
-	}
-
-	file, err := h._storage.Upload(filename, data)
+	file, err := h._storage.Upload(filename, bf.Bytes())
 	if err != nil {
 		err = fmt.Errorf("h._storage.Upload: %w", err)
 		h.lg.Error(err)
@@ -154,33 +147,11 @@ func (h *Handler) DownloadFileByChunk(req *v1.DownloadFileRequest, conn v1.Imagi
 		<-h.duLimitCh
 	}()
 
-	file, err := h._storage.Download(req.GetFilename())
+	err := h.streamFileAsync(req.GetFilename(), int(req.GetChunkBuffSize()), conn)
 	if err != nil {
-		err = fmt.Errorf("h._storage.Download: %w", err)
+		err = fmt.Errorf("%w", err)
 		h.lg.Error(err)
 		return err
-	}
-
-	reader := bufio.NewReader(bytes.NewReader(file))
-	for {
-		chunk := make([]byte, req.GetChunkSize())
-		_, err = reader.Read(chunk)
-		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				err = fmt.Errorf("reader.Read: %w", err)
-				h.lg.Error(err)
-				return err
-			}
-			break
-		}
-		err = conn.Send(&v1.DownloadFileResponse{
-			Data: chunk,
-		})
-		if err != nil {
-			err = fmt.Errorf("conn.Send: %w", err)
-			h.lg.Error(err)
-			return err
-		}
 	}
 
 	return nil

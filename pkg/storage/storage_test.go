@@ -30,7 +30,7 @@ func TestStorage_Upload(t *testing.T) {
 		data, err := storage.Download(file.Name)
 		require.Nil(t, err)
 
-		require.Equal(t, data, testCase.data)
+		require.Equal(t, data.Bytes, testCase.data)
 	}
 }
 
@@ -63,7 +63,7 @@ func TestStorage_Download(t *testing.T) {
 			continue
 		}
 
-		require.Equal(t, data, testCase.data)
+		require.Equal(t, data.Bytes, testCase.data)
 	}
 }
 
