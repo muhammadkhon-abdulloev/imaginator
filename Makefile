@@ -8,3 +8,6 @@ build:
 
 test:
 	go test -v ./...
+
+protoc:
+	protoc -I . --go_out=. --go-grpc_out=. proto/imaginator.proto

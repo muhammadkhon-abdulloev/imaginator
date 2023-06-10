@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ImaginatorClient interface {
 	UploadFile(ctx context.Context, in *UploadFileRequest, opts ...grpc.CallOption) (*UploadFileResponse, error)
 	DownloadFile(ctx context.Context, in *DownloadFileRequest, opts ...grpc.CallOption) (*DownloadFileResponse, error)
-	ListAllFiles(ctx context.Context, in *ListAllFilesMessage, opts ...grpc.CallOption) (*ListAllFilesMessage, error)
+	ListAllFiles(ctx context.Context, in *ListAllFilesRequest, opts ...grpc.CallOption) (*ListAllFilesResponse, error)
 	// stream
 	UploadFileByChunk(ctx context.Context, opts ...grpc.CallOption) (Imaginator_UploadFileByChunkClient, error)
 	DownloadFileByChunk(ctx context.Context, in *DownloadFileRequest, opts ...grpc.CallOption) (Imaginator_DownloadFileByChunkClient, error)
@@ -56,8 +56,8 @@ func (c *imaginatorClient) DownloadFile(ctx context.Context, in *DownloadFileReq
 	return out, nil
 }
 
-func (c *imaginatorClient) ListAllFiles(ctx context.Context, in *ListAllFilesMessage, opts ...grpc.CallOption) (*ListAllFilesMessage, error) {
-	out := new(ListAllFilesMessage)
+func (c *imaginatorClient) ListAllFiles(ctx context.Context, in *ListAllFilesRequest, opts ...grpc.CallOption) (*ListAllFilesResponse, error) {
+	out := new(ListAllFilesResponse)
 	err := c.cc.Invoke(ctx, "/imaginator.v1.Imaginator/ListAllFiles", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -137,7 +137,7 @@ func (x *imaginatorDownloadFileByChunkClient) Recv() (*DownloadFileResponse, err
 type ImaginatorServer interface {
 	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
 	DownloadFile(context.Context, *DownloadFileRequest) (*DownloadFileResponse, error)
-	ListAllFiles(context.Context, *ListAllFilesMessage) (*ListAllFilesMessage, error)
+	ListAllFiles(context.Context, *ListAllFilesRequest) (*ListAllFilesResponse, error)
 	// stream
 	UploadFileByChunk(Imaginator_UploadFileByChunkServer) error
 	DownloadFileByChunk(*DownloadFileRequest, Imaginator_DownloadFileByChunkServer) error
@@ -154,7 +154,7 @@ func (UnimplementedImaginatorServer) UploadFile(context.Context, *UploadFileRequ
 func (UnimplementedImaginatorServer) DownloadFile(context.Context, *DownloadFileRequest) (*DownloadFileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DownloadFile not implemented")
 }
-func (UnimplementedImaginatorServer) ListAllFiles(context.Context, *ListAllFilesMessage) (*ListAllFilesMessage, error) {
+func (UnimplementedImaginatorServer) ListAllFiles(context.Context, *ListAllFilesRequest) (*ListAllFilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAllFiles not implemented")
 }
 func (UnimplementedImaginatorServer) UploadFileByChunk(Imaginator_UploadFileByChunkServer) error {
@@ -213,7 +213,7 @@ func _Imaginator_DownloadFile_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _Imaginator_ListAllFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListAllFilesMessage)
+	in := new(ListAllFilesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func _Imaginator_ListAllFiles_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/imaginator.v1.Imaginator/ListAllFiles",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ImaginatorServer).ListAllFiles(ctx, req.(*ListAllFilesMessage))
+		return srv.(ImaginatorServer).ListAllFiles(ctx, req.(*ListAllFilesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

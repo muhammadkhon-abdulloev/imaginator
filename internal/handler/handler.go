@@ -72,7 +72,7 @@ func (h *Handler) DownloadFile(_ context.Context, req *v1.DownloadFileRequest) (
 	}, nil
 }
 
-func (h *Handler) ListAllFiles(_ context.Context, _ *v1.ListAllFilesMessage) (*v1.ListAllFilesMessage, error) {
+func (h *Handler) ListAllFiles(_ context.Context, req *v1.ListAllFilesRequest) (*v1.ListAllFilesResponse, error) {
 	var resFiles []*v1.Files
 	h.lafLimitCh <- struct{}{}
 	defer func() {
@@ -86,7 +86,7 @@ func (h *Handler) ListAllFiles(_ context.Context, _ *v1.ListAllFilesMessage) (*v
 		return nil, err
 	}
 
-	for _, file := range files {
+	for _, file := range h._storage.Paginate(req.GetLimit(), req.GetOffset(), files) {
 		resFiles = append(resFiles, &v1.Files{
 			Filename:  file.Name,
 			CreatedAt: file.CreatedAt.UnixMilli(),
@@ -94,7 +94,10 @@ func (h *Handler) ListAllFiles(_ context.Context, _ *v1.ListAllFilesMessage) (*v
 		})
 	}
 
-	return &v1.ListAllFilesMessage{Files: resFiles}, nil
+	return &v1.ListAllFilesResponse{
+		Files:    resFiles,
+		TotalLen: int64(len(files)),
+	}, nil
 }
 
 func (h *Handler) UploadFileByChunk(conn v1.Imaginator_UploadFileByChunkServer) error {

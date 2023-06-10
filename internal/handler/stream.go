@@ -10,7 +10,10 @@ import (
 	"os"
 )
 
-const maxActiveGoroutines = 10
+const (
+	maxActiveGoroutines = 10
+	maxBuffSize         = 500 * 1024
+)
 
 type chunk struct {
 	bufSize int
@@ -78,8 +81,8 @@ func (h *Handler) streamFileAsync(
 
 	filesize := int(fileStat.Size())
 
-	if chunkBuffSize == 0 {
-		chunkBuffSize = filesize / 10
+	if chunkBuffSize == 0 || chunkBuffSize > maxBuffSize {
+		chunkBuffSize = maxBuffSize
 	}
 
 	// quantity of chunks

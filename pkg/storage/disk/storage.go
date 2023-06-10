@@ -1,4 +1,4 @@
-package diskstorage
+package disk
 
 import (
 	"fmt"
@@ -14,26 +14,25 @@ import (
 
 const (
 	fileNameTemp = "%d_%s"
-	//bufSize      = 500 * 1024
-	maxLimit = 100
+	maxLimit     = 100
 )
 
 var _ storage.IStorage = (*Storage)(nil)
 
-type DiskStorage struct {
+type Storage struct {
 	filesPath string
 }
 
-func NewDiskStorage(filesPath string) *Storage {
+func NewStorage(filesPath string) *Storage {
 	return &Storage{
 		filesPath: filesPath,
 	}
 }
-func (s *Storage) Upload(filename string, data []byte) (*File, error) {
+func (s *Storage) Upload(filename string, data []byte) (*storage.File, error) {
 	filename = strings.ReplaceAll(filename, "_", "-")
 	filename = strings.ReplaceAll(filename, "/", "-")
 
-	file := NewFile(fmt.Sprintf(fileNameTemp, time.Now().UnixMilli(), filename), 0, time.Now(), time.Now())
+	file := storage.NewFile(fmt.Sprintf(fileNameTemp, time.Now().UnixMilli(), filename), 0, time.Now(), time.Now())
 	if file.Name == "" {
 		file.Name = fmt.Sprintf(fileNameTemp, file.CreatedAt.UnixMilli(), uuid.NewString())
 	}
@@ -54,7 +53,7 @@ func (s *Storage) Upload(filename string, data []byte) (*File, error) {
 	return file, nil
 }
 
-func (s *Storage) Download(filename string) (*File, error) {
+func (s *Storage) Download(filename string) (*storage.File, error) {
 	file, err := os.Open(s.filesPath + "/" + filename)
 	if err != nil {
 		return nil, fmt.Errorf("os.Open: %w", err)
@@ -72,7 +71,7 @@ func (s *Storage) Download(filename string) (*File, error) {
 		return nil, fmt.Errorf("crypto.FileChecksumSHA256: %w", err)
 	}
 
-	f := NewEmptyFile()
+	f := storage.NewEmptyFile()
 	f.SetBytes(data)
 	f.SetCheckSum(checksum)
 
@@ -88,8 +87,8 @@ func (s *Storage) GetFile(filename string) (*os.File, error) {
 	return file, nil
 }
 
-func (s *Storage) ListAllFiles(limit, offset int) ([]*File, error) {
-	var files []*File
+func (s *Storage) ListAllFiles() ([]*storage.File, error) {
+	var files []*storage.File
 
 	dirEntries, err := os.ReadDir(s.filesPath)
 	if err != nil {
@@ -108,14 +107,14 @@ func (s *Storage) ListAllFiles(limit, offset int) ([]*File, error) {
 				createdAt = file.ModTime().UnixMilli()
 			}
 
-			files = append(files, NewFile(file.Name(), file.Size(), time.UnixMilli(createdAt), file.ModTime()))
+			files = append(files, storage.NewFile(file.Name(), file.Size(), time.UnixMilli(createdAt), file.ModTime()))
 		}
 	}
 
-	return paginate(limit, offset, files), nil
+	return files, nil
 }
 
-func paginate(limit, offset int, files []*File) []*File {
+func (s *Storage) Paginate(limit, offset int64, files []*storage.File) []*storage.File {
 	if offset != 0 {
 		offset--
 	}
@@ -124,7 +123,7 @@ func paginate(limit, offset int, files []*File) []*File {
 		limit = maxLimit
 	}
 
-	total := len(files) - 1
+	total := int64(len(files) - 1)
 	firstEntry := offset * limit
 	lastEntry := firstEntry + limit
 

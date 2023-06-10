@@ -31,14 +31,20 @@ message Files {
   int64 updatedAt = 3;
 }
 
-message ListAllFilesMessage {
+message ListAllFilesRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+}
+
+message ListAllFilesResponse {
   repeated Files files = 1;
+  int64 totalLen = 2;
 }
 
 service Imaginator {
   rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
   rpc DownloadFile(DownloadFileRequest) returns (DownloadFileResponse) {}
-  rpc ListAllFiles(ListAllFilesMessage) returns (ListAllFilesMessage) {}
+  rpc ListAllFiles(ListAllFilesRequest) returns (ListAllFilesResponse) {}
 
   // stream
   rpc UploadFileByChunk(stream UploadFileRequest) returns (UploadFileResponse) {}
