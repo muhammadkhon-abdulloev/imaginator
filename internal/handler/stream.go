@@ -78,6 +78,10 @@ func (h *Handler) streamFileAsync(
 
 	filesize := int(fileStat.Size())
 
+	if chunkBuffSize == 0 {
+		chunkBuffSize = filesize / 10
+	}
+
 	// quantity of chunks
 	chunksQ := filesize / chunkBuffSize
 	if filesize%chunkBuffSize != 0 {
