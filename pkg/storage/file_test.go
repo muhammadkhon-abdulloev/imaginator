@@ -1,4 +1,4 @@
-package storage
+package disk
 
 import (
 	"github.com/stretchr/testify/require"

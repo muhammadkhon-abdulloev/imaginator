@@ -1,9 +1,10 @@
-package storage
+package diskstorage
 
 import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/muhammadkhon-abdulloev/imaginator/pkg/crypto"
+	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage"
 	"io"
 	"os"
 	"strconv"
@@ -14,15 +15,16 @@ import (
 const (
 	fileNameTemp = "%d_%s"
 	//bufSize      = 500 * 1024
+	maxLimit = 100
 )
 
-var _ IStorage = (*Storage)(nil)
+var _ storage.IStorage = (*Storage)(nil)
 
-type Storage struct {
+type DiskStorage struct {
 	filesPath string
 }
 
-func NewStorage(filesPath string) *Storage {
+func NewDiskStorage(filesPath string) *Storage {
 	return &Storage{
 		filesPath: filesPath,
 	}
@@ -86,7 +88,7 @@ func (s *Storage) GetFile(filename string) (*os.File, error) {
 	return file, nil
 }
 
-func (s *Storage) ListAllFiles() ([]*File, error) {
+func (s *Storage) ListAllFiles(limit, offset int) ([]*File, error) {
 	var files []*File
 
 	dirEntries, err := os.ReadDir(s.filesPath)
@@ -110,5 +112,29 @@ func (s *Storage) ListAllFiles() ([]*File, error) {
 		}
 	}
 
-	return files, nil
+	return paginate(limit, offset, files), nil
+}
+
+func paginate(limit, offset int, files []*File) []*File {
+	if offset != 0 {
+		offset--
+	}
+
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
+	total := len(files) - 1
+	firstEntry := offset * limit
+	lastEntry := firstEntry + limit
+
+	if firstEntry > total {
+		firstEntry = total
+	}
+
+	if lastEntry > total {
+		lastEntry = total
+	}
+
+	return files[firstEntry:lastEntry]
 }
