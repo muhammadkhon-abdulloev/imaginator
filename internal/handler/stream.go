@@ -65,6 +65,9 @@ func (h *Handler) streamFileAsync(
 	chunkBuffSize int,
 	conn v1.Imaginator_DownloadFileByChunkServer,
 ) error {
+	if len(filename) < 2 {
+		return ErrInvalidFileName
+	}
 	file, err := h._storage.GetFile(filename)
 	if err != nil {
 		err = fmt.Errorf("h._storage.Download: %w", err)
@@ -77,6 +80,10 @@ func (h *Handler) streamFileAsync(
 	fileStat, err := file.Stat()
 	if err != nil {
 		return fmt.Errorf("file.Stat: %w", err)
+	}
+
+	if fileStat.IsDir() {
+		return ErrInvalidFileName
 	}
 
 	filesize := int(fileStat.Size())

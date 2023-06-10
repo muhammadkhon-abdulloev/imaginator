@@ -18,5 +18,5 @@ make test
 
 Для генерации .proto файла
 ```shell
-protoc -I . --go_out=. --go-grpc_out=. proto/imaginator.proto
+make protoc
 ```

@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-type IStorage interface {
+type StorageManager interface {
 	Upload(filename string, data []byte) (*File, error)
 	Download(filename string) (*File, error)
 	GetFile(filename string) (*os.File, error)

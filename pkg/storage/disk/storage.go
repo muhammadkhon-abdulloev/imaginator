@@ -3,8 +3,10 @@ package disk
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/pkg/crypto"
 	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage"
+	"go.uber.org/fx"
 	"io"
 	"os"
 	"strconv"
@@ -17,15 +19,23 @@ const (
 	maxLimit     = 100
 )
 
-var _ storage.IStorage = (*Storage)(nil)
-
 type Storage struct {
 	filesPath string
 }
 
-func NewStorage(filesPath string) *Storage {
+var (
+	_      storage.StorageManager = (*Storage)(nil)
+	Option                        = fx.Provide(New)
+)
+
+type Params struct {
+	fx.In
+	Config *config.Config
+}
+
+func New(p Params) *Storage {
 	return &Storage{
-		filesPath: filesPath,
+		filesPath: p.Config.Server.ImagesPath,
 	}
 }
 func (s *Storage) Upload(filename string, data []byte) (*storage.File, error) {

@@ -1,26 +1,24 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/handler"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/middleware"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/server"
-	"github.com/muhammadkhon-abdulloev/pkg/logger"
+	"github.com/muhammadkhon-abdulloev/imaginator/pkg/logger"
+	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage/disk"
+	"go.uber.org/fx"
 )
 
 func main() {
-	cfg, err := config.Init(context.Background())
-	if err != nil {
-		panic(fmt.Errorf("config.Init: %w", err).Error())
-	}
+	mainModules := fx.Options(
+		config.Option,
+		logger.Option,
+		disk.Option,
+		handler.Option,
+		middleware.Option,
+		server.Option,
+	)
 
-	lg := logger.NewLogger()
-	if err = lg.InitLogger(cfg.Logger); err != nil {
-		panic(fmt.Errorf("lg.InitLogger: %w", err).Error())
-	}
-
-	srv := server.NewServer(lg)
-	if err = srv.Run(); err != nil {
-		panic(fmt.Errorf("srv.Run: %w", err).Error())
-	}
+	fx.New(mainModules).Run()
 }

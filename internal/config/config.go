@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/muhammadkhon-abdulloev/pkg/logger"
 	"github.com/sethvargo/go-envconfig"
+	"go.uber.org/fx"
 )
 
 type Config struct {
@@ -12,7 +13,10 @@ type Config struct {
 	Server Server
 }
 
-var _c = &Config{}
+var (
+	_c     = &Config{}
+	Option = fx.Provide(context.Background, Init)
+)
 
 func GetConfig() *Config {
 	return _c

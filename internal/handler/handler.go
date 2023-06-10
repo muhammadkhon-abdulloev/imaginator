@@ -6,30 +6,39 @@ import (
 	"errors"
 	"fmt"
 	v1 "github.com/muhammadkhon-abdulloev/imaginator/gen/go/imaginator/v1"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage"
+	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage/disk"
 	"github.com/muhammadkhon-abdulloev/pkg/logger"
+	"go.uber.org/fx"
 	"io"
 )
 
 type Handler struct {
 	duLimitCh  chan struct{} // download/upload limit chan
 	lafLimitCh chan struct{} // list all files limit chan
-	_storage   storage.IStorage
+	_storage   storage.StorageManager
 	lg         *logger.Logger
 	v1.UnimplementedImaginatorServer
 }
 
-func NewHandler(
-	duLimit,
-	lafLimit int,
-	_storage storage.IStorage,
-	lg *logger.Logger,
-) *Handler {
+var (
+	Option = fx.Provide(New)
+)
+
+type Params struct {
+	fx.In
+	Config  *config.Config
+	Logger  *logger.Logger
+	Storage *disk.Storage
+}
+
+func New(p Params) *Handler {
 	return &Handler{
-		duLimitCh:  make(chan struct{}, duLimit),
-		lafLimitCh: make(chan struct{}, lafLimit),
-		_storage:   _storage,
-		lg:         lg,
+		duLimitCh:  make(chan struct{}, p.Config.Server.UploadDownloadLimit),
+		lafLimitCh: make(chan struct{}, p.Config.Server.ListAllFilesLimit),
+		_storage:   p.Storage,
+		lg:         p.Logger,
 	}
 }
 
@@ -149,7 +158,6 @@ func (h *Handler) DownloadFileByChunk(req *v1.DownloadFileRequest, conn v1.Imagi
 	defer func() {
 		<-h.duLimitCh
 	}()
-
 	err := h.streamFileAsync(req.GetFilename(), int(req.GetChunkBuffSize()), conn)
 	if err != nil {
 		err = fmt.Errorf("%w", err)

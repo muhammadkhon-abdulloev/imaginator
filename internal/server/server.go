@@ -1,46 +1,82 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"github.com/muhammadkhon-abdulloev/imaginator/gen/go/imaginator/v1"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/handler"
-	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage/disk"
+	"github.com/muhammadkhon-abdulloev/imaginator/internal/middleware"
 	"github.com/muhammadkhon-abdulloev/pkg/logger"
+	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"net"
 )
 
 type Server struct {
-	lg *logger.Logger
+	lg               *logger.Logger
+	mdw              *middleware.Middleware
+	imaginatorServer v1.ImaginatorServer
 }
 
-func NewServer(lg *logger.Logger) *Server {
-	return &Server{
-		lg: lg,
+var Option = fx.Invoke(New)
+
+type Params struct {
+	fx.In
+	Logger           *logger.Logger
+	Middleware       *middleware.Middleware
+	ImaginatorServer *handler.Handler
+}
+
+func New(
+	lc fx.Lifecycle,
+	p Params,
+) {
+	s := &Server{
+		lg:               p.Logger,
+		mdw:              p.Middleware,
+		imaginatorServer: p.ImaginatorServer,
 	}
+	var srv *grpc.Server
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) (err error) {
+			srv, err = s.Run()
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			srv.GracefulStop()
+			return nil
+		},
+	})
 }
 
-func (s Server) Run() error {
+func (s Server) Run() (*grpc.Server, error) {
 	l, err := net.Listen("tcp", ":"+config.GetConfig().Server.Port)
 	if err != nil {
-		return fmt.Errorf("net.Listen: %w", err)
+		return nil, fmt.Errorf("net.Listen: %w", err)
 	}
-
-	st := disk.NewStorage(config.GetConfig().Server.ImagesPath)
-	h := handler.NewHandler(
-		config.GetConfig().Server.UploadDownloadLimit,
-		config.GetConfig().Server.ListAllFilesLimit,
-		st,
-		s.lg,
+	srv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			s.mdw.UnaryLoggingInterceptor(),
+			s.mdw.UnaryRecoverInterceptor(),
+		),
+		grpc.ChainStreamInterceptor(
+			s.mdw.StreamLoggingInterceptor(),
+			s.mdw.StreamRecoverInterceptor(),
+		),
 	)
 
-	srv := grpc.NewServer()
-	v1.RegisterImaginatorServer(srv, h)
+	v1.RegisterImaginatorServer(srv, s.imaginatorServer)
 
-	if err = srv.Serve(l); err != nil {
-		return fmt.Errorf("srv.Serve: %w", err)
-	}
+	go func() {
+		if err := srv.Serve(l); err != nil {
+			s.lg.Error(fmt.Errorf("srv.Serve: %w", err).Error())
+		}
+	}()
 
-	return nil
+	return srv, nil
 }
