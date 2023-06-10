@@ -2,7 +2,6 @@ package disk
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/muhammadkhon-abdulloev/imaginator/internal/config"
 	"github.com/muhammadkhon-abdulloev/imaginator/pkg/crypto"
 	"github.com/muhammadkhon-abdulloev/imaginator/pkg/storage"
@@ -38,9 +37,6 @@ func (s *Storage) Upload(filename string, data []byte) (*storage.File, error) {
 	filename = strings.ReplaceAll(filename, "/", "-")
 
 	file := storage.NewFile(fmt.Sprintf(fileNameTemp, time.Now().UnixMilli(), filename), 0, time.Now(), time.Now())
-	if file.Name == "" {
-		file.Name = fmt.Sprintf(fileNameTemp, file.CreatedAt.UnixMilli(), uuid.NewString())
-	}
 
 	newFile, err := os.Create(s.filesPath + "/" + file.Name)
 	if err != nil {

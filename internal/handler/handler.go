@@ -47,8 +47,13 @@ func (h *Handler) UploadFile(_ context.Context, req *v1.UploadFileRequest) (*v1.
 	defer func() {
 		<-h.duLimitCh
 	}()
+	filename := req.GetFilename()
 
-	file, err := h._storage.Upload(req.GetFilename(), req.GetData())
+	if len(filename) < 3 {
+		return nil, ErrInvalidFileName
+	}
+
+	file, err := h._storage.Upload(filename, req.GetData())
 	if err != nil {
 		err = fmt.Errorf("h._storage.Upload: %w", err)
 		h.lg.Error(err)
@@ -131,6 +136,10 @@ func (h *Handler) UploadFileByChunk(conn v1.Imaginator_UploadFileByChunkServer) 
 		}
 		bf.Write(req.GetData())
 		filename = req.GetFilename()
+	}
+
+	if len(filename) < 3 {
+		return ErrInvalidFileName
 	}
 
 	file, err := h._storage.Upload(filename, bf.Bytes())
